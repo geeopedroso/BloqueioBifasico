@@ -18,7 +18,7 @@ public enum Acesso {
     ABORT("A");
     String texto;
 
-    private Acesso(String texto) {
+     Acesso(String texto) {
         this.texto = texto;
     }
 
@@ -26,5 +26,10 @@ public enum Acesso {
     public String toString() {
         return texto;
     }
+
+    public void setTexto(String texto) {
+        this.texto = texto;
+    }
     
+   
 }

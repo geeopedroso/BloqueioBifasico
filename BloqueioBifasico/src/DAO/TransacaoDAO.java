@@ -5,6 +5,7 @@
  */
 package DAO;
 
+import Model.Acesso;
 import Model.Operacao;
 import Model.Schedule;
 import java.sql.Connection;
@@ -21,7 +22,7 @@ import java.util.Random;
  * @author geovani
  */
 public class TransacaoDAO {
-    
+
     private static Conexao minhaConexao;
 
     public TransacaoDAO() {
@@ -29,20 +30,19 @@ public class TransacaoDAO {
         Conexao.getCabecalho();
     }
 
-    public static LinkedList<Operacao> gravarTransacoes(Schedule schedule , boolean ultimo) {
+    public static LinkedList<Operacao> gravarTransacoes(Schedule schedule, boolean ultimo) {
         Operacao operacao = null;
 
         Connection conn = minhaConexao.getConnection();
         String sql = "INSERT INTO schedule(indiceTransacao, operacao, itemDado, timestampj) VALUES (?, ?, ?, ?)";
-        
-        
+
         PreparedStatement stmt = null;
-        
-        int randomico = (ultimo)? schedule.getScheduleInList().size() :new Random().nextInt(schedule.getScheduleInList().size());
+
+        int randomico = (ultimo) ? schedule.getScheduleInList().size() : new Random().nextInt(schedule.getScheduleInList().size());
         if (randomico < (schedule.getScheduleInList().size() / 2)) {
             randomico += (schedule.getScheduleInList().size() / 2);
         }
-        
+
         while ((!schedule.getScheduleInList().isEmpty()) && (randomico > 0)) {
             operacao = schedule.getScheduleInList().removeFirst();
             try {
@@ -67,6 +67,49 @@ public class TransacaoDAO {
         return schedule.getScheduleInList();
     }
 
+    public static LinkedList<Operacao> buscarTransacoes() {
+        LinkedList<Operacao> operacoes = new LinkedList<>();
+        Conexao minhaConexao = new Conexao();
+        Connection conn = minhaConexao.getConnection();
+        String sql = "select * from  schedule";
+
+        try {
+            PreparedStatement stm = conn.prepareStatement(sql);
+
+            ResultSet rs = stm.executeQuery();
+
+            while (rs.next()) {
+
+                String nome = rs.getString("itemDado");
+                Integer id = rs.getInt("indicetransacao");
+
+                String ace = rs.getString("operacao");
+                Acesso acesso = null;
+                if (ace.equals("B")) {
+                    acesso = Acesso.BEGIN;
+                } else if (ace.equals("R")) {
+                    acesso = Acesso.READ;
+                }
+                if (ace.equals("W")) {
+                    acesso = Acesso.WRITE;
+                } else if (ace.equals("E")) {
+                    acesso = Acesso.END;
+                }
+                if (ace.equals("C")) {
+                    acesso = Acesso.COMMIT;
+                } else if (ace.equals("A")) {
+                    acesso = Acesso.ABORT;
+                }
+                Operacao operacao = new Operacao(nome, acesso, id);
+                operacoes.add(operacao);
+
+            }
+        } catch (Exception e) {
+            System.out.println("erro busca dados");
+        }
+        return operacoes;
+    }
+
     public static int pegarUltimoIndice() {
         int ultimoIndice = 0;
         minhaConexao = new Conexao();
@@ -85,5 +128,5 @@ public class TransacaoDAO {
         }
         return ultimoIndice;
     }
-    
+
 }
