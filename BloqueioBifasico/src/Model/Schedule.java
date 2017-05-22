@@ -15,7 +15,7 @@ import java.util.Random;
 public class Schedule {
     private LinkedList<Operacao> scheduleInList;
 
-    public Schedule(LinkedList<Transacao> transacoes) {
+    public Schedule() {
         scheduleInList = new LinkedList<>();
         
     }

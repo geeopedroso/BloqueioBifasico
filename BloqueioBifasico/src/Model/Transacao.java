@@ -21,13 +21,7 @@ public class Transacao {
         this.meuIndice = indice;
     }
 
-    public static void preencherTransacoes(LinkedList<Operacao> operacoes, Transacao t) {
-        for(Operacao op: operacoes){
-            if(t.meuIndice.equals(op.getIndice())){
-                t.filaOperacoes.add(op);
-            }
-        }
-    }
+    
 
     public Integer getMeuIndice() {
         return meuIndice;

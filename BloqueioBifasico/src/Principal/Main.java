@@ -16,9 +16,6 @@ import java.util.LinkedList;
  */
 public class Main {
     public static void main(String[] args) {
-        LinkedList<Operacao> operacoes = TransacaoDAO.buscarTransacoes();
-        for(Operacao p: operacoes){
-            System.out.println("T"+p.getIndice()+" "+ p.getAcesso().toString()+"("+ p.getDado().getNome()+")");
-        }
+        Escalonador.escalonar();
     }
 }
