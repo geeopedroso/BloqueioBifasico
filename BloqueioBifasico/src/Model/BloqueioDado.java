@@ -102,42 +102,37 @@ public class BloqueioDado {
         return dados;
     }
 
+    public static boolean Contem(LinkedList<Dado> dados, Dado dado) {
+
+        for (Dado d : dados) {
+            if (d.getNome().equals(dado.getNome())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /*
     Função que devolve as transações que estava em espera para a lista de executando, a partir do dado desbloqueado
     recentemente.
      */
     public static void acorda(LinkedList<Operacao> emEspera, LinkedList<Dado> dadosDesbloqueados, LinkedList<Operacao> executando) {
-        
-//        Iterator<Dado> iteratordado = dadosDesbloqueados.iterator();
-//        while (iteratordado.hasNext()) {
-//            Dado d = iteratordado.next();
-//
-//            for (int i = 0; i < emEspera.size(); i++) {
-//                if (emEspera.get(i).getDado().getNome().equals(d.getNome())) {
-//                    Transacao t = new Transacao(emEspera.get(i).getTransacao().getMeuIndice());
-//                    Dado dado = new Dado(d.getNome());
-//                    
-//                    executando.add(0,new Operacao(emEspera.get(i).getAcesso(), t, dado));
-//                    emEspera.remove(i);
-//                }
-//            }
-//        }
-        
-        
-        
-        
-        for (Dado d : dadosDesbloqueados) {
-            Iterator<Operacao> iteratorEmEspera = emEspera.iterator();
-            while (iteratorEmEspera.hasNext()) {
-                Operacao operacao = iteratorEmEspera.next();
-                if (operacao.getDado().getNome().equals(d.getNome())) {
-                   Transacao t =  new Transacao(operacao.getTransacao().getMeuIndice());
-                    Dado dado = new Dado(d.getNome());
-                    executando.add(0, new Operacao(operacao.getAcesso(), t, dado));
-                    iteratorEmEspera.remove();
-                }
+
+        Collections.reverse(emEspera);
+
+        Iterator<Operacao> iteratorEmEspera = emEspera.iterator();
+        while (iteratorEmEspera.hasNext()) {
+            Operacao operacao = iteratorEmEspera.next();
+            if (Contem(dadosDesbloqueados, operacao.getDado()) || operacao.getAcesso().equals(Acesso.END)) {
+                Transacao t = new Transacao(operacao.getTransacao().getMeuIndice());
+                Dado dado = new Dado(operacao.getDado().getNome());
+                Acesso acesso = operacao.getAcesso();
+                executando.add(0, new Operacao(acesso, t, dado));
+                iteratorEmEspera.remove();
             }
         }
+
+        Collections.reverse(emEspera);
     }
 
     public Dado getDado() {

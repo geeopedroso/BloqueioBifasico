@@ -16,6 +16,7 @@ import Model.Transacao;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -23,9 +24,11 @@ import java.util.LinkedList;
  */
 public class Escalonador {
 
-    public static void escalonar() {
+    public static void escalonar() throws InterruptedException {
         Schedule executar = new Schedule();
         executar.setScheduleInList(TransacaoDAO.buscarTransacoes());
+        Integer indice = TransacaoDAO.pegarUltimoIndice();
+        Busca busca = new Busca();
 
 //        for(Operacao p: executar.getScheduleInList()){
 //            System.out.println("T"+p.getTransacao().getMeuIndice()+" "+ p.getAcesso().toString()+"("+ p.getDado().getNome()+")");
@@ -35,6 +38,10 @@ public class Escalonador {
         LinkedList<BloqueioDado> bloqueados = new LinkedList<>();
 
         while (!executar.getScheduleInList().isEmpty()) {
+
+            System.out.println("indice: " + indice);
+            System.out.println("executar: " + executar.getScheduleInList().size());
+
             Transacao transacao = executar.getScheduleInList().get(0).getTransacao();
             Dado dado = executar.getScheduleInList().get(0).getDado();
             Acesso acesso = executar.getScheduleInList().get(0).getAcesso();
@@ -49,7 +56,7 @@ public class Escalonador {
 
                         if (!BloqueioDado.donoDoBloqueio(bloqueados, dado, transacao)
                                 && BloqueioDado.estaBloqueadoExclusivo(bloqueados, dado)) {
-                            System.out.println("nao sou dono do bloqueio" + "\n meu nome: " + executar.getScheduleInList().get(0).getTransacao().getMeuIndice());
+
                             emEspera.getScheduleInList().add(executar.getScheduleInList().remove(0));
                         } else {
                             terminado.getScheduleInList().add(executar.getScheduleInList().remove(0));
@@ -78,51 +85,30 @@ public class Escalonador {
                     }
                     break;
                 case END:
-                    System.out.println("Acabei :  " + transacao.getMeuIndice());
-                    LinkedList<Dado> dadosDesbloqueados = BloqueioDado.desbloqueia(bloqueados, transacao.getMeuIndice());
+                    List<Integer> contem = Schedule.Contem(emEspera.getScheduleInList(), transacao);
+                    if (!contem.isEmpty()) {
+                        emEspera.getScheduleInList().add((contem.get(contem.size() - 1) + 1),
+                                executar.getScheduleInList().remove(0));
+                    } else {
 
-                    executar.getScheduleInList().get(0).setAcesso(Acesso.COMMIT);
-                    terminado.getScheduleInList().add(executar.getScheduleInList().remove(0));
+                        LinkedList<Dado> dadosDesbloqueados = BloqueioDado.desbloqueia(bloqueados, transacao.getMeuIndice());
 
-                    System.out.println("\n executando antes do acorda");
-                    for (Operacao p : executar.getScheduleInList()) {
-                        System.out.println("T" + p.getTransacao().getMeuIndice() + " " + p.getAcesso().toString() + "(" + p.getDado().getNome() + ")");
-                    }
+                        executar.getScheduleInList().get(0).setAcesso(Acesso.COMMIT);
+                        terminado.getScheduleInList().add(executar.getScheduleInList().remove(0));
 
-                    System.out.println("\n em espera antes do acorda ");
-                    for (Operacao p : emEspera.getScheduleInList()) {
-                        System.out.println("T" + p.getTransacao().getMeuIndice() + " " + p.getAcesso().toString() + "(" + p.getDado().getNome() + ")");
-                    }
+                        BloqueioDado.acorda(emEspera.getScheduleInList(), dadosDesbloqueados, executar.getScheduleInList());
 
-                    BloqueioDado.acorda(emEspera.getScheduleInList(), dadosDesbloqueados, executar.getScheduleInList());
-
-                    System.out.println("\n executando depois do acorda");
-                    for (Operacao p : executar.getScheduleInList()) {
-                        System.out.println("T" + p.getTransacao().getMeuIndice() + " " + p.getAcesso().toString() + "(" + p.getDado().getNome() + ")");
-                    }
-
-                    System.out.println("\n em espera depois do acorda");
-                    for (Operacao p : emEspera.getScheduleInList()) {
-                        System.out.println("T" + p.getTransacao().getMeuIndice() + " " + p.getAcesso().toString() + "(" + p.getDado().getNome() + ")");
                     }
                     break;
 
             }
+            indice = busca.run(executar.getScheduleInList(), indice);
+
         }
-        System.out.println("\n terminado");
+        System.out.println("\n terminados \n");
         for (Operacao p : terminado.getScheduleInList()) {
             System.out.println("T" + p.getTransacao().getMeuIndice() + " " + p.getAcesso().toString() + "(" + p.getDado().getNome() + ")");
         }
-        System.out.println("\n em espera");
-        for (Operacao p : emEspera.getScheduleInList()) {
-            System.out.println("T" + p.getTransacao().getMeuIndice() + " " + p.getAcesso().toString() + "(" + p.getDado().getNome() + ")");
-        }
-
-        System.out.println("\n dados bloqueados");
-        for (BloqueioDado b : bloqueados) {
-            System.out.println("T" + b.getTransacao().getMeuIndice() + " "
-                    + "(" + b.getDado().getNome() + ")" + b.getBloqueio().toString());
-        }
-
+        //TransacaoDAO.gravarTransacoes(terminado);
     }
 }

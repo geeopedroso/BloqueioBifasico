@@ -5,7 +5,9 @@
  */
 package Model;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -13,14 +15,26 @@ import java.util.Random;
  * @author geovani
  */
 public class Schedule {
+
     private LinkedList<Operacao> scheduleInList;
 
     public Schedule() {
         scheduleInList = new LinkedList<>();
-        
+
     }
 
-    
+    public static List<Integer> Contem(List<Operacao> lista, Transacao t) {
+        List<Integer> indices = new ArrayList<>();
+
+        for (int i = 0; i < lista.size(); i++) {
+            if (lista.get(i).getTransacao().getMeuIndice().equals(t.getMeuIndice())) {
+                indices.add(i);
+
+            }
+
+        }
+        return indices;
+    }
 
     public LinkedList<Operacao> getScheduleInList() {
         return scheduleInList;
@@ -29,13 +43,13 @@ public class Schedule {
     public void setScheduleInList(LinkedList<Operacao> scheduleInList) {
         this.scheduleInList = scheduleInList;
     }
-    
-    public void addRetorno(LinkedList<Operacao> retorn){
-        
+
+    public void addRetorno(LinkedList<Operacao> retorn) {
+
         retorn.addAll(this.getScheduleInList());
         this.scheduleInList = new LinkedList<Operacao>();
         this.scheduleInList.addAll(retorn);
-    };
+    }
+;
 
-    
 }
