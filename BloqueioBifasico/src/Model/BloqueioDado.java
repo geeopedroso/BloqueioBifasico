@@ -83,6 +83,21 @@ public class BloqueioDado {
         }
         return false;
     }
+    
+    /*
+    Funcao que retorna trançacao dona do bloqueio
+    */
+    public static Transacao donoDoBloqueio(LinkedList<BloqueioDado> bloqueados, Dado d) {
+        Transacao t = null;
+        for (BloqueioDado b : bloqueados) {
+            if (b.getDado().getNome().equals(d.getNome())) {
+                t =  b.getTransacao();
+                
+                
+            }
+        }
+        return t;
+    }
 
     /*
     Função que retira da lista de bloqueados, os dados que foram bloqueados por uma transação.

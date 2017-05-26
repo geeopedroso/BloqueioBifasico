@@ -35,6 +35,18 @@ public class Schedule {
         }
         return indices;
     }
+    
+    public static LinkedList<Operacao> Está(List<Operacao> lista, Transacao t) {
+        LinkedList<Operacao> operacoes = new LinkedList<>();
+
+        for (Operacao operacao: lista) {
+            if (operacao.getTransacao().getMeuIndice().equals(t.getMeuIndice())) {
+                operacoes.add(operacao); 
+            }
+
+        }
+        return operacoes;
+    }
 
     public LinkedList<Operacao> getScheduleInList() {
         return scheduleInList;
