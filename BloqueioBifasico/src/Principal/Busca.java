@@ -16,7 +16,7 @@ import java.util.LinkedList;
 public class Busca extends Thread {
     public Integer run(LinkedList<Operacao> operacoes, Integer indice) throws InterruptedException{
         //System.out.println("sleep");
-        Thread.sleep(50);
+        Thread.sleep(500);
         
         TransacaoDAO.buscarTransacoes(operacoes, indice);
         indice = TransacaoDAO.pegarUltimoIndice();

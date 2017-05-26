@@ -39,8 +39,8 @@ public class Escalonador {
 
         while (!executar.getScheduleInList().isEmpty()) {//enquanto tiver algo na lista, escalone
 
-            System.out.println("indice: " + indice);
-            System.out.println("executar: " + executar.getScheduleInList().size());
+//            System.out.println("indice: " + indice);
+//            System.out.println("executar: " + executar.getScheduleInList().size());
 
             Transacao transacao = executar.getScheduleInList().get(0).getTransacao();
             Dado dado = executar.getScheduleInList().get(0).getDado();
@@ -56,19 +56,20 @@ public class Escalonador {
 
                         if (!BloqueioDado.donoDoBloqueio(bloqueados, dado, transacao)
                                 && BloqueioDado.estaBloqueadoExclusivo(bloqueados, dado)) {
-//                            if (Escalonador.deadlock(emEspera.getScheduleInList(), bloqueados, executar.getScheduleInList().get(0))) {
-//                                    System.out.println("\n\n DEAD LOCK \n\n");
-//                                    System.exit(0);
-//                            }
+                            if (Escalonador.deadlock(emEspera.getScheduleInList(), bloqueados, executar.getScheduleInList().get(0))) {
+                                    System.out.println("\n\n DEAD LOCK \n\n");
+                                    System.exit(0);
+                            }
                             emEspera.getScheduleInList().add(executar.getScheduleInList().remove(0));
                         } else {
                             terminado.getScheduleInList().add(executar.getScheduleInList().remove(0));
+                            System.out.println("T" + transacao.getMeuIndice() + " " + acesso.toString() + "(" + dado.getNome() + ")");
                         }
 
                     } else {
                         bloqueados.add(new BloqueioDado(transacao, dado, Bloqueio.COMPARTILHADO));
                         terminado.getScheduleInList().add(executar.getScheduleInList().remove(0));
-
+                        System.out.println("T" + transacao.getMeuIndice() + " " + acesso.toString() + "(" + dado.getNome() + ")");
                     }
 
                     break;
@@ -76,19 +77,21 @@ public class Escalonador {
                 case WRITE:
                     if (BloqueioDado.estaBloqueado(bloqueados, dado)) {
                         if (!BloqueioDado.donoDoBloqueio(bloqueados, dado, transacao)) {
-//                            if (Escalonador.deadlock(emEspera.getScheduleInList(), bloqueados, executar.getScheduleInList().get(0))) {
-//                                    System.out.println("\n\n DEAD LOCK \n\n");
-//                                    System.exit(0);
-//                            }
+                            if (Escalonador.deadlock(emEspera.getScheduleInList(), bloqueados, executar.getScheduleInList().get(0))) {
+                                    System.out.println("\n\n DEAD LOCK \n\n");
+                                    System.exit(0);
+                            }
                             emEspera.getScheduleInList().add(executar.getScheduleInList().remove(0));
                         } else {
                             BloqueioDado.setaExclusivo(bloqueados, dado);
                             terminado.getScheduleInList().add(executar.getScheduleInList().remove(0));
+                            System.out.println("T" + transacao.getMeuIndice() + " " + acesso.toString() + "(" + dado.getNome() + ")");
                         }
 
                     } else {
                         bloqueados.add(new BloqueioDado(transacao, dado, Bloqueio.EXCLUSIVO));
                         terminado.getScheduleInList().add(executar.getScheduleInList().remove(0));
+                        System.out.println("T" + transacao.getMeuIndice() + " " + acesso.toString() + "(" + dado.getNome() + ")");
                     }
                     break;
                 case END:
@@ -102,7 +105,7 @@ public class Escalonador {
 
                         executar.getScheduleInList().get(0).setAcesso(Acesso.COMMIT);
                         terminado.getScheduleInList().add(executar.getScheduleInList().remove(0));
-
+                        System.out.println("T" + transacao.getMeuIndice() + " " + acesso.toString() + "(" + dado.getNome() + ")");
                         BloqueioDado.acorda(emEspera.getScheduleInList(), dadosDesbloqueados, executar.getScheduleInList());
 
                     }
@@ -115,11 +118,11 @@ public class Escalonador {
             indice = busca.run(executar.getScheduleInList(), indice);
 
         }
-        System.out.println("\n terminados \n");
-        for (Operacao p : terminado.getScheduleInList()) {
-            System.out.println("T" + p.getTransacao().getMeuIndice() + " " + p.getAcesso().toString() + "(" + p.getDado().getNome() + ")");
-        }
-        //TransacaoDAO.gravarTransacoes(terminado);
+//        System.out.println("\n terminados \n");
+//        for (Operacao p : terminado.getScheduleInList()) {
+//            System.out.println("T" + p.getTransacao().getMeuIndice() + " " + p.getAcesso().toString() + "(" + p.getDado().getNome() + ")");
+//        }
+        TransacaoDAO.gravarTransacoes(terminado);
     }
 
     public static boolean deadlock(LinkedList<Operacao> emEspera, LinkedList<BloqueioDado> bloqueados,
